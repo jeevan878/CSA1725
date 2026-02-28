@@ -1,0 +1,53 @@
+#include <DHT.h>
+#include <LiquidCrystal.h>
+
+// Pin Definitions
+#define DHTPIN 2          // DHT11 connected to pin 2
+#define DHTTYPE DHT11     // DHT11 sensor type
+#define BUZZER 8          // Buzzer connected to pin 8
+
+// Initialize DHT and LCD
+DHT dht(DHTPIN, DHTTYPE);
+LiquidCrystal lcd(7, 6, 5, 4, 3, 9); 
+// (RS, E, D4, D5, D6, D7)
+
+// Temperature Threshold
+float threshold = 35.0;   // Set safe temperature limit (change if needed)
+
+void setup() {
+  lcd.begin(16, 2);
+  dht.begin();
+  pinMode(BUZZER, OUTPUT);
+
+  lcd.print("Temp Monitoring");
+  delay(2000);
+  lcd.clear();
+}
+
+void loop() {
+  float temp = dht.readTemperature();  // Read temperature
+
+  if (isnan(temp)) {
+    lcd.setCursor(0, 0);
+    lcd.print("Sensor Error");
+    return;
+  }
+
+  lcd.setCursor(0, 0);
+  lcd.print("Temp: ");
+  lcd.print(temp);
+  lcd.print(" C   ");
+
+  // Check threshold
+  if (temp > threshold) {
+    digitalWrite(BUZZER, HIGH);
+    lcd.setCursor(0, 1);
+    lcd.print("High Temp Alert ");
+  } else {
+    digitalWrite(BUZZER, LOW);
+    lcd.setCursor(0, 1);
+    lcd.print("Normal Temp     ");
+  }
+
+  delay(2000);
+}
